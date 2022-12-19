@@ -144,12 +144,12 @@ function cleanResponse(
   options: ISolveRouteOptions
 ): ISolveRouteResponse {
   if (options.rawResponse) {
-    const origResponse = res;
-    return res.json().then((data: ISolveRouteResponse) => {
+    res.cleanJson=async ()=> {
+      const data = await res.json();
       const processedData = processSolveRouteResponse(data);
-      origResponse.json = () => Promise.resolve(processedData);
-      return origResponse;
-    });
+      return processedData;
+    };
+    return res;
   } else {
     return processSolveRouteResponse(res);
   }

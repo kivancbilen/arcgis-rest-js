@@ -693,9 +693,8 @@ describe("solveRoute", () => {
       .then(async (response) => {
         expect(fetchMock.called()).toEqual(true);
         const [url, options]: [string, RequestInit] = fetchMock.lastCall("*");
-        const response2 = response as any;
-        const resp = await response2.json();
-        expect(Object.keys(resp.routes)).toContain("geoJson");
+        const resp2 = await (response as any).cleanJson();
+        expect(Object.keys(resp2.routes)).toContain("geoJson");
         done();
         
       })
