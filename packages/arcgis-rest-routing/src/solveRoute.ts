@@ -133,11 +133,29 @@ export function solveRoute(
   }
 
   return request(`${cleanUrl(options.endpoint)}/solve`, options).then(
-    cleanResponse
+    (response) => {
+      return cleanResponse(response, options);
+    }
   );
 }
 
-function cleanResponse(res: any): ISolveRouteResponse {
+function cleanResponse(
+  res: any,
+  options: ISolveRouteOptions
+): ISolveRouteResponse {
+  if (options.rawResponse) {
+    const origResponse = res;
+    return res.json().then((data: ISolveRouteResponse) => {
+      const processedData = processSolveRouteResponse(data);
+      origResponse.json = () => Promise.resolve(processedData);
+      return origResponse;
+    });
+  } else {
+    return processSolveRouteResponse(res);
+  }
+}
+
+function processSolveRouteResponse(res: any) {
   if (res.directions && res.directions.length > 0) {
     res.directions = res.directions.map(
       (direction: {

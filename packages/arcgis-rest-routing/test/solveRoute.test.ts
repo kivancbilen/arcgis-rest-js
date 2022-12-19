@@ -1,7 +1,7 @@
 /* Copyright (c) 2018 Environmental Systems Research Institute, Inc.
  * Apache-2.0 */
 
-import { solveRoute } from "../src/solveRoute";
+import { ISolveRouteResponse, solveRoute } from "../src/solveRoute";
 
 import * as fetchMock from "fetch-mock";
 
@@ -669,6 +669,35 @@ describe("solveRoute", () => {
         const [url, options]: [string, RequestInit] = fetchMock.lastCall("*");
         expect(Object.keys(response.routes)).not.toContain("geoJson");
         done();
+      })
+      .catch((e) => {
+        fail(e);
+      });
+  });
+
+  it("should return raw response", (done) => {
+    fetchMock.once("*", Solve);
+
+    const MOCK_AUTH = {
+      getToken() {
+        return Promise.resolve("token");
+      },
+      portal: "https://mapsdev.arcgis.com",
+    };
+
+    solveRoute({
+      stops: stopsObjectsPoint,
+      authentication: MOCK_AUTH,
+      rawResponse: true,
+    })
+      .then(async (response) => {
+        expect(fetchMock.called()).toEqual(true);
+        const [url, options]: [string, RequestInit] = fetchMock.lastCall("*");
+        const response2 = response as any;
+        const resp = await response2.json();
+        expect(Object.keys(resp.routes)).toContain("geoJson");
+        done();
+        
       })
       .catch((e) => {
         fail(e);
